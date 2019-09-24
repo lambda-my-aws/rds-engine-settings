@@ -1,0 +1,11 @@
+*~
+*.pyc
+*pycache*
+*.json
+*.yml
+*.zip
+.venv*
+!function_config.yml
+!function_template.yml
+!example.yml
+!test_template.yml

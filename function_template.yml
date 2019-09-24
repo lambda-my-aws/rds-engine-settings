@@ -1,0 +1,66 @@
+---
+# TEMPLATE GENERATED VIA COOKIECUTTER. ADAPT ACCORDINGLY
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Description: Template for function rds_engine_settings
+Parameters:
+  NewAliasName:
+    Type: String
+    Default: 'live'
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: rds_engine_settings.zip
+      AutoPublishAlias: !Ref NewAliasName
+      Environment:
+        Variables:
+          Key: Value
+      Handler: function.lambda_handler
+      MemorySize: 256
+      Role: !GetAtt 'LambdaFunctionRole.Arn'
+      Runtime: python3.7
+      Timeout: 15
+      FunctionName: !Ref 'AWS::NoValue'
+
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - !Sub 'lambda.${AWS::URLSuffix}'
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+
+
+  LambdaFunctionAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: 'AllowRdsAccess'
+      Roles:
+        - !Ref LambdaFunctionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 'rds:Describe*'
+            Effect: Allow
+            Resource:
+              - '*'
+
+  SsmLambdaArnPointer:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: Name of the lambda function to get RDS DB Engine Version settings
+      Name: /rds/functions/engine_settings/arn
+      Type: String
+      Value: !Sub '${LambdaFunction.Arn}:live'
