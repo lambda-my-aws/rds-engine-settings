@@ -1,5 +1,11 @@
 Description: Simple RDS Instance template with SecretsManager
 Parameters:
+  UseServerless:
+    Type: String
+    AllowedValues:
+      - False
+      - True
+    Default: False
   RdsEngineVersion:
     AllowedValues:
       - aurora-mysql--5.7.12
@@ -317,7 +323,7 @@ Parameters:
       - sqlserver-web--14.00.3035.2.v1
       - sqlserver-web--14.00.3049.1.v1
     Type: String
-    Default: aurora-postgresql--9.6.12
+    Default:  aurora-postgresql--9.6.12
   RdsSettingsFunctionArn:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /rds/functions/engine_settings/arn
@@ -328,6 +334,8 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !Ref RdsSettingsFunctionArn
+      GenerateParameterGroupSettings: True
+      Serverless: !Ref UseServerless
       EngineName: !Select
         - 0
         - Fn::Split:
@@ -338,6 +346,14 @@ Resources:
         - Fn::Split:
             - '--'
             - !Ref RdsEngineVersion
+  RdsAuroraParameterGroup:
+    DependsOn:
+      - lambdaGetDBEngineVersion
+    Properties:
+      Description: !Sub 'RDS DB Settings for ${AWS::StackName} - ${lambdaGetDBEngineVersion.DBParameterGroupFamily}'
+      Family: !GetAtt 'lambdaGetDBEngineVersion.DBParameterGroupFamily'
+      Parameters: !GetAtt 'lambdaGetDBEngineVersion.ParameterGroupParameters'
+    Type: AWS::RDS::DBClusterParameterGroup
 
 Outputs:
   EngineFamily:

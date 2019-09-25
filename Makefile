@@ -28,8 +28,9 @@ ALIAS_NAME		?= $(shell bash -c 'read -p "Alias name: " alias; echo $$alias')
 
 STACK			:=lambda-function-rds-engine-settings
 FUNCTION_NAME		:=rds_engine_settings
+ifndef BUCKET_NAME
 BUCKET_NAME		:=lambda-dev-eu-west-1
-
+endif
 export VIRTUAL_ENV 	:= $(abspath ${VENV})
 export PATH 		:= ${VIRTUAL_ENV}/bin:${PATH}
 

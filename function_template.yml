@@ -15,14 +15,16 @@ Resources:
     Properties:
       CodeUri: rds_engine_settings.zip
       AutoPublishAlias: !Ref NewAliasName
+      Layers:
+        - arn:aws:lambda:eu-west-1:373709687836:layer:requests:1
       Environment:
         Variables:
           Key: Value
       Handler: function.lambda_handler
-      MemorySize: 256
+      MemorySize: 128
       Role: !GetAtt 'LambdaFunctionRole.Arn'
       Runtime: python3.7
-      Timeout: 15
+      Timeout: 10
       FunctionName: !Ref 'AWS::NoValue'
 
   LambdaFunctionRole:
@@ -39,8 +41,6 @@ Resources:
         Version: '2012-10-17'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
-
 
   LambdaFunctionAccessPolicy:
     Type: AWS::IAM::Policy
